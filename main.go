@@ -5,11 +5,12 @@ import (
         "github.com/tarm/serial"
         "fmt"
         "net/http"
+        "github.com/gorilla/mux"
+        "encoding/json"
 )
 
-func initializeHttpHandlers() {
-        http.HandleFunc("/light/", handler)
-        http.ListenAndServe(":3010", nil)
+type API struct {
+    Message string "json:message"
 }
 
 func initializeSerializer(color string) {
@@ -32,10 +33,17 @@ func initializeSerializer(color string) {
         log.Printf("%q", buf[:n])
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    //fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-    color := r.URL.Path[len("/light/"):]
-    fmt.Fprintf(w, color);
+func handleLightColor(w http.ResponseWriter, r *http.Request) {
+    urlParams := mux.Vars(r)
+    color := urlParams["color"]
+    HelloMessage := "Hello, " + color
+
+    message := API{HelloMessage}
+    output, err := json.Marshal(message)
+
+    if err != nil {
+        fmt.Println("Something went wrong!")
+    }
 
     if color == "red" {
        initializeSerializer("1");
@@ -43,9 +51,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
     if color == "blue" {
         initializeSerializer("0");
     }
+
+    fmt.Fprintf(w, string(output))
 }
 
 func main() {
-        initializeHttpHandlers();
+    gorillaRoute := mux.NewRouter()
+    gorillaRoute.HandleFunc("/light/{color}", handleLightColor)
+    http.Handle("/", gorillaRoute)
+    http.ListenAndServe(":3010", nil)
 }
 
