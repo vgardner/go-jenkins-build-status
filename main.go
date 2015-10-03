@@ -4,9 +4,11 @@ import (
         "log"
         "github.com/tarm/serial"
         "fmt"
+        "time"
         "net/http"
         "github.com/gorilla/mux"
         "encoding/json"
+        "io/ioutil"
 )
 
 type API struct {
@@ -55,10 +57,32 @@ func handleLightColor(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, string(output))
 }
 
-func main() {
+func handleHttpRequests() {
     gorillaRoute := mux.NewRouter()
     gorillaRoute.HandleFunc("/light/{color}", handleLightColor)
     http.Handle("/", gorillaRoute)
     http.ListenAndServe(":3010", nil)
+}
+
+func getFrequentStatusFromJenkins() {
+    for {
+        time.Sleep(time.Second * 3)
+        log.Printf("hey")
+
+        resp, err := http.Get("http://localhost:8080/api/json?pretty=true")
+
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        defer resp.Body.Close()
+        body, err := ioutil.ReadAll(resp.Body)
+        log.Printf(string(body))
+    }
+}
+
+func main() {
+    //handleHttpRequests()
+    getFrequentStatusFromJenkins()
 }
 
