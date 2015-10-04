@@ -74,15 +74,21 @@ func sendRequestToJenkins() {
     defer resp.Body.Close()
     body, err := ioutil.ReadAll(resp.Body)
 
+    type JobItem struct {
+        Name string
+        Url string
+        Color string
+    }
+
     type B struct {
         Mode string
         NodeDescription string
-        Jobs string
+        Jobs []JobItem
     }
 
     msg := new(B)
     _ = json.Unmarshal([]byte(string(body)), &msg)
-    fmt.Println("Done", msg.NodeDescription)
+    fmt.Println("Done", msg.Jobs[0].Color)
 
     //log.Printf(string(body))
 }
