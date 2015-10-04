@@ -11,7 +11,7 @@ import (
         "github.com/joho/godotenv"
         "encoding/json"
         "io/ioutil"
-        "gopkg.in/yaml.v2"
+        "strconv"
 )
 
 type API struct {
@@ -99,40 +99,48 @@ func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
     msg := new(JenkinsApiData)
     _ = json.Unmarshal([]byte(jenkinsJson), &msg)
 
-    fmt.Println(os.Getenv("HELLO"))
-
     monitoredJob := JobItem{}
 
     for _, jobItem := range msg.Jobs {
-        if jobItem.Name == "golights" {
+        if jobItem.Name == os.Getenv("job_name") {
             monitoredJob = jobItem;
             break;
         }
     }
-
+    getLightCode(monitoredJob.Color)
     return monitoredJob.Color
 }
 
 func getFrequentStatusFromJenkins() {
+    var pollingFrequency int64
+
+    pollingFrequency, _ = strconv.ParseInt(os.Getenv("polling_frequency"), 10, 64)
+
     for {
-        time.Sleep(time.Second * 3)
+        time.Sleep(time.Second * time.Duration(pollingFrequency))
         sendRequestToJenkins()
     }
 }
 
-func getConfiguration() {
-    type Config struct {
-        Job_name string
+func getLightCode(statusColor string) {
+
+    lightCodes := map[string]int{
+      "blue": 1,
+      "blue_anime": 10,
+      "yellow": 2,
+      "yellow_anime": 20,
+      "red": 3,
+      "red_anime": 30,
+      "grey": 4,
+      "grey_anime": 40,
+      "aborted": 4,
+      "aborted_anime": 40,
+      "disabled": 4,
+      "disabled_anime": 40,
     }
 
-    t := Config{}
-    data, _ := ioutil.ReadFile("config.yaml")
-    //fmt.Println(string(data))
-    err := yaml.Unmarshal(data, &t)
-    if err != nil {
-        log.Fatalf("error: %v", err)
-    }
-    fmt.Println(t)
+
+    fmt.Println(lightCodes[statusColor])
 }
 
 func main() {
