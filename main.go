@@ -38,7 +38,7 @@ func initializeSerializer(color string) {
         log.Printf("%q", buf[:n])
 }
 
-func handleLightColor(w http.ResponseWriter, r *http.Request) {
+func handleLightColorRequest(w http.ResponseWriter, r *http.Request) {
     urlParams := mux.Vars(r)
     color := urlParams["color"]
     HelloMessage := "Hello, " + color
@@ -50,24 +50,22 @@ func handleLightColor(w http.ResponseWriter, r *http.Request) {
         fmt.Println("Something went wrong!")
     }
 
-    if color == "red" {
-       initializeSerializer("1");
-    }
-    if color == "blue" {
-        initializeSerializer("0");
-    }
-
     fmt.Fprintf(w, string(output))
+}
+
+func setArduinoLightColor(lightColorCode string) {
+    fmt.Println("Done", lightColorCode)
+    initializeSerializer(lightColorCode);
 }
 
 func handleHttpRequests() {
     gorillaRoute := mux.NewRouter()
-    gorillaRoute.HandleFunc("/light/{color}", handleLightColor)
+    gorillaRoute.HandleFunc("/light/{color}", handleLightColorRequest)
     http.Handle("/", gorillaRoute)
     http.ListenAndServe(":3010", nil)
 }
 
-func sendRequestToJenkins() {
+func sendRequestToJenkinsAPI() string {
     resp, err := http.Get("http://localhost:8080/api/json?pretty=true")
 
     if err != nil {
@@ -77,9 +75,7 @@ func sendRequestToJenkins() {
     defer resp.Body.Close()
     jenkinsJson, err := ioutil.ReadAll(resp.Body)
 
-    jobStatus := getJobsStatusFromJenkinsJson(string(jenkinsJson))
-
-    fmt.Println("Done", jobStatus)
+    return string(jenkinsJson)
 }
 
 func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
@@ -107,7 +103,7 @@ func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
             break;
         }
     }
-    getLightCode(monitoredJob.Color)
+
     return monitoredJob.Color
 }
 
@@ -118,29 +114,37 @@ func getFrequentStatusFromJenkins() {
 
     for {
         time.Sleep(time.Second * time.Duration(pollingFrequency))
-        sendRequestToJenkins()
+
+        jenkinsJson := sendRequestToJenkinsAPI()
+
+        jobStatus := getJobsStatusFromJenkinsJson(jenkinsJson)
+
+        lightColorCode := getLightColorCode(jobStatus)
+
+        setArduinoLightColor(lightColorCode)
+
+        fmt.Println("Done", jobStatus)
     }
 }
 
-func getLightCode(statusColor string) {
+func getLightColorCode(statusColor string) string{
 
-    lightCodes := map[string]int{
-      "blue": 1,
-      "blue_anime": 10,
-      "yellow": 2,
-      "yellow_anime": 20,
-      "red": 3,
-      "red_anime": 30,
-      "grey": 4,
-      "grey_anime": 40,
-      "aborted": 4,
-      "aborted_anime": 40,
-      "disabled": 4,
-      "disabled_anime": 40,
+    lightColorCodes := map[string]string{
+      "blue": "1",
+      "blue_anime": "0",
+      "yellow": "2",
+      "yellow_anime": "20",
+      "red": "3",
+      "red_anime": "30",
+      "grey": "4",
+      "grey_anime": "40",
+      "aborted": "4",
+      "aborted_anime": "40",
+      "disabled": "4",
+      "disabled_anime": "40",
     }
 
-
-    fmt.Println(lightCodes[statusColor])
+    return lightColorCodes[statusColor]
 }
 
 func main() {
