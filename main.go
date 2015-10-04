@@ -72,7 +72,14 @@ func sendRequestToJenkins() {
     }
 
     defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
+    jenkinsJson, err := ioutil.ReadAll(resp.Body)
+
+    jobStatus := getJobsStatusFromJenkinsJson(string(jenkinsJson))
+
+    fmt.Println("Done", jobStatus)
+}
+
+func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
 
     type JobItem struct {
         Name string
@@ -80,17 +87,25 @@ func sendRequestToJenkins() {
         Color string
     }
 
-    type B struct {
+    type JenkinsApiData struct {
         Mode string
         NodeDescription string
         Jobs []JobItem
     }
 
-    msg := new(B)
-    _ = json.Unmarshal([]byte(string(body)), &msg)
-    fmt.Println("Done", msg.Jobs[0].Color)
+    msg := new(JenkinsApiData)
+    _ = json.Unmarshal([]byte(jenkinsJson), &msg)
 
-    //log.Printf(string(body))
+    monitoredJob := JobItem{}
+
+    for _, jobItem := range msg.Jobs {
+        if jobItem.Name == "golights" {
+            monitoredJob = jobItem;
+            break;
+        }
+    }
+
+    return monitoredJob.Color
 }
 
 func getFrequentStatusFromJenkins() {
