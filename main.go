@@ -73,7 +73,18 @@ func sendRequestToJenkins() {
 
     defer resp.Body.Close()
     body, err := ioutil.ReadAll(resp.Body)
-    log.Printf(string(body))
+
+    type B struct {
+        Mode string
+        NodeDescription string
+        Jobs string
+    }
+
+    msg := new(B)
+    _ = json.Unmarshal([]byte(string(body)), &msg)
+    fmt.Println("Done", msg.NodeDescription)
+
+    //log.Printf(string(body))
 }
 
 func getFrequentStatusFromJenkins() {
