@@ -2,13 +2,16 @@ package main
 
 import (
         "log"
+        "os"
         "github.com/tarm/serial"
         "fmt"
         "time"
         "net/http"
         "github.com/gorilla/mux"
+        "github.com/joho/godotenv"
         "encoding/json"
         "io/ioutil"
+        "gopkg.in/yaml.v2"
 )
 
 type API struct {
@@ -96,6 +99,8 @@ func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
     msg := new(JenkinsApiData)
     _ = json.Unmarshal([]byte(jenkinsJson), &msg)
 
+    fmt.Println(os.Getenv("HELLO"))
+
     monitoredJob := JobItem{}
 
     for _, jobItem := range msg.Jobs {
@@ -115,7 +120,26 @@ func getFrequentStatusFromJenkins() {
     }
 }
 
+func getConfiguration() {
+    type Config struct {
+        Job_name string
+    }
+
+    t := Config{}
+    data, _ := ioutil.ReadFile("config.yaml")
+    //fmt.Println(string(data))
+    err := yaml.Unmarshal(data, &t)
+    if err != nil {
+        log.Fatalf("error: %v", err)
+    }
+    fmt.Println(t)
+}
+
 func main() {
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatal("Error loading .env file")
+    }
     //handleHttpRequests()
     getFrequentStatusFromJenkins()
 }
