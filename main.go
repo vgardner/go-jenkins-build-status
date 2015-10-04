@@ -18,6 +18,7 @@ type API struct {
     Message string "json:message"
 }
 
+// Connect to Arduino board by USB serial and send the color code.
 func initializeSerializer(color string) {
         config := &serial.Config{Name: "/dev/tty.usbserial-A60080Ig", Baud: 9600}
         s, err := serial.OpenPort(config)
@@ -38,6 +39,7 @@ func initializeSerializer(color string) {
         log.Printf("%q", buf[:n])
 }
 
+// Handles request to chnage light color.
 func handleLightColorRequest(w http.ResponseWriter, r *http.Request) {
     urlParams := mux.Vars(r)
     color := urlParams["color"]
@@ -53,11 +55,13 @@ func handleLightColorRequest(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, string(output))
 }
 
+// Sets the color of the light on the Arduino board.
 func setArduinoLightColor(lightColorCode string) {
     fmt.Println("Done", lightColorCode)
     initializeSerializer(lightColorCode);
 }
 
+// Initializes server and routes http requests.
 func handleHttpRequests() {
     gorillaRoute := mux.NewRouter()
     gorillaRoute.HandleFunc("/light/{color}", handleLightColorRequest)
@@ -65,6 +69,7 @@ func handleHttpRequests() {
     http.ListenAndServe(":3010", nil)
 }
 
+// Send request to Jenkins API and retrieves the status Json.
 func sendRequestToJenkinsAPI() string {
     resp, err := http.Get("http://localhost:8080/api/json?pretty=true")
 
@@ -78,6 +83,7 @@ func sendRequestToJenkinsAPI() string {
     return string(jenkinsJson)
 }
 
+// Parses the Json from Jenkins and retrives the specified job's status code.
 func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
 
     type JobItem struct {
@@ -107,6 +113,7 @@ func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
     return monitoredJob.Color
 }
 
+// Handles the polling of requests to Jenkins.
 func getFrequentStatusFromJenkins() {
     var pollingFrequency int64
 
@@ -127,6 +134,7 @@ func getFrequentStatusFromJenkins() {
     }
 }
 
+// Get associated light code from Jenkins job for Arduino.
 func getLightColorCode(statusColor string) string{
 
     lightColorCodes := map[string]string{
