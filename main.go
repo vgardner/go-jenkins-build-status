@@ -3,17 +3,19 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-	"github.com/tarm/serial"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	"github.com/tarm/serial"
 )
 
+// API represents an API message.
 type API struct {
 	Message string "json:message"
 }
@@ -62,7 +64,7 @@ func setArduinoLightColor(lightColorCode string) {
 }
 
 // Initializes server and routes http requests.
-func handleHttpRequests() {
+func handleHTTPRequests() {
 	gorillaRoute := mux.NewRouter()
 	gorillaRoute.HandleFunc("/light/{color}", handleLightColorRequest)
 	http.Handle("/", gorillaRoute)
@@ -78,28 +80,28 @@ func sendRequestToJenkinsAPI() string {
 	}
 
 	defer resp.Body.Close()
-	jenkinsJson, err := ioutil.ReadAll(resp.Body)
+	jenkinsJSON, err := ioutil.ReadAll(resp.Body)
 
-	return string(jenkinsJson)
+	return string(jenkinsJSON)
 }
 
-// Parses the Json from Jenkins and retrives the specified job's status code.
-func getJobsStatusFromJenkinsJson(jenkinsJson string) string {
+// Parses the JSON from Jenkins and retrives the specified job's status code.
+func getJobsStatusFromJenkinsJSON(jenkinsJSON string) string {
 
 	type JobItem struct {
 		Name  string
-		Url   string
+		URL   string
 		Color string
 	}
 
-	type JenkinsApiData struct {
+	type JenkinsAPIData struct {
 		Mode            string
 		NodeDescription string
 		Jobs            []JobItem
 	}
 
-	msg := new(JenkinsApiData)
-	_ = json.Unmarshal([]byte(jenkinsJson), &msg)
+	msg := new(JenkinsAPIData)
+	_ = json.Unmarshal([]byte(jenkinsJSON), &msg)
 
 	monitoredJob := JobItem{}
 
@@ -122,9 +124,9 @@ func getFrequentStatusFromJenkins() {
 	for {
 		time.Sleep(time.Second * time.Duration(pollingFrequency))
 
-		jenkinsJson := sendRequestToJenkinsAPI()
+		jenkinsJSON := sendRequestToJenkinsAPI()
 
-		jobStatus := getJobsStatusFromJenkinsJson(jenkinsJson)
+		jobStatus := getJobsStatusFromJenkinsJson(jenkinsJSON)
 
 		lightColorCode := getLightColorCode(jobStatus)
 
