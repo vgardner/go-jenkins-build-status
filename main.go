@@ -140,8 +140,8 @@ func getJobsStatusFromJenkinsJSON(jenkinsJSON string) string {
 func getLightColorCode(statusColor string) string {
 
 	lightColorCodes := map[string]string{
-		"blue":           "1",
-		"blue_anime":     "0",
+		"blue":           "hello",
+		"blue_anime":     "hi",
 		"yellow":         "2",
 		"yellow_anime":   "20",
 		"red":            "3",
