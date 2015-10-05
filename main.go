@@ -17,7 +17,7 @@ import (
 
 // API represents an API message.
 type API struct {
-	Message string "json:message"
+	Message string `json:"message"`
 }
 
 // Connect to Arduino board by USB serial and send the color code.
