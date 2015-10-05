@@ -85,6 +85,27 @@ func sendRequestToJenkinsAPI() string {
 	return string(jenkinsJSON)
 }
 
+// Handles the polling of requests to Jenkins.
+func getFrequentStatusFromJenkins() {
+    var pollingFrequency int64
+
+    pollingFrequency, _ = strconv.ParseInt(os.Getenv("polling_frequency"), 10, 64)
+
+    for {
+        time.Sleep(time.Second * time.Duration(pollingFrequency))
+
+        jenkinsJSON := sendRequestToJenkinsAPI()
+
+        jobStatus := getJobsStatusFromJenkinsJSON(jenkinsJSON)
+
+        lightColorCode := getLightColorCode(jobStatus)
+
+        setArduinoLightColor(lightColorCode)
+
+        fmt.Println("Done", jobStatus)
+    }
+}
+
 // Parses the JSON from Jenkins and retrives the specified job's status code.
 func getJobsStatusFromJenkinsJSON(jenkinsJSON string) string {
 
@@ -113,27 +134,6 @@ func getJobsStatusFromJenkinsJSON(jenkinsJSON string) string {
 	}
 
 	return monitoredJob.Color
-}
-
-// Handles the polling of requests to Jenkins.
-func getFrequentStatusFromJenkins() {
-	var pollingFrequency int64
-
-	pollingFrequency, _ = strconv.ParseInt(os.Getenv("polling_frequency"), 10, 64)
-
-	for {
-		time.Sleep(time.Second * time.Duration(pollingFrequency))
-
-		jenkinsJSON := sendRequestToJenkinsAPI()
-
-		jobStatus := getJobsStatusFromJenkinsJson(jenkinsJSON)
-
-		lightColorCode := getLightColorCode(jobStatus)
-
-		setArduinoLightColor(lightColorCode)
-
-		fmt.Println("Done", jobStatus)
-	}
 }
 
 // Get associated light code from Jenkins job for Arduino.
