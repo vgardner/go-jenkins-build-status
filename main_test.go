@@ -19,4 +19,9 @@ func Test_GetLightColorCode(t *testing.T) {
 	if lightColorCode3 != "0" {
 		t.Error("Expected", "0", "got", lightColorCode3)
 	}
+
+	lightColorCode4 := getLightColorCode("blue_anime")
+	if lightColorCode4 != "0" {
+		t.Error("Expected", "0", "got", lightColorCode4)
+	}
 }
