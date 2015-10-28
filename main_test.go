@@ -11,17 +11,17 @@ func Test_GetLightColorCode(t *testing.T) {
 	}
 
 	lightColorCode2 := getLightColorCode("blue_anime")
-	if lightColorCode2 != "0" {
-		t.Error("Expected", "0", "got", lightColorCode2)
+	if lightColorCode2 != "10" {
+		t.Error("Expected", "10", "got", lightColorCode2)
 	}
 
-	lightColorCode3 := getLightColorCode("blue_anime")
-	if lightColorCode3 != "0" {
-		t.Error("Expected", "0", "got", lightColorCode3)
+	lightColorCode3 := getLightColorCode("yellow")
+	if lightColorCode3 != "2" {
+		t.Error("Expected", "2", "got", lightColorCode3)
 	}
 
-	lightColorCode4 := getLightColorCode("blue_anime")
-	if lightColorCode4 != "0" {
-		t.Error("Expected", "0", "got", lightColorCode4)
+	lightColorCode4 := getLightColorCode("yellow_anime")
+	if lightColorCode4 != "20" {
+		t.Error("Expected", "20", "got", lightColorCode4)
 	}
 }

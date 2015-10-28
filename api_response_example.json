@@ -1,0 +1,39 @@
+{
+  "assignedLabels" : [
+    {
+
+    }
+  ],
+  "mode" : "NORMAL",
+  "nodeDescription" : "the master Jenkins node",
+  "nodeName" : "",
+  "numExecutors" : 2,
+  "description" : null,
+  "jobs" : [
+    {
+      "name" : "golights",
+      "url" : "http://localhost:8080/job/golights/",
+      "color" : "blue"
+    }
+  ],
+  "overallLoad" : {
+
+  },
+  "primaryView" : {
+    "name" : "All",
+    "url" : "http://localhost:8080/"
+  },
+  "quietingDown" : false,
+  "slaveAgentPort" : 0,
+  "unlabeledLoad" : {
+
+  },
+  "useCrumbs" : false,
+  "useSecurity" : false,
+  "views" : [
+    {
+      "name" : "All",
+      "url" : "http://localhost:8080/"
+    }
+  ]
+}

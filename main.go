@@ -54,6 +54,8 @@ func handleLightColorRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Something went wrong!")
 	}
 
+	setArduinoLightColor(getLightColorCode(color))
+
 	fmt.Fprintf(w, string(output))
 }
 
@@ -73,6 +75,7 @@ func handleHTTPRequests() {
 
 // Send request to Jenkins API and retrieves the status Json.
 func sendRequestToJenkinsAPI() string {
+	//os.Getenv("jenkins_url") +
 	resp, err := http.Get("http://localhost:8080/api/json?pretty=true")
 
 	if err != nil {
@@ -87,23 +90,23 @@ func sendRequestToJenkinsAPI() string {
 
 // Handles the polling of requests to Jenkins.
 func getFrequentStatusFromJenkins() {
-    var pollingFrequency int64
+	var pollingFrequency int64
 
-    pollingFrequency, _ = strconv.ParseInt(os.Getenv("polling_frequency"), 10, 64)
+	pollingFrequency, _ = strconv.ParseInt(os.Getenv("polling_frequency"), 10, 64)
 
-    for {
-        time.Sleep(time.Second * time.Duration(pollingFrequency))
+	for {
+		time.Sleep(time.Second * time.Duration(pollingFrequency))
 
-        jenkinsJSON := sendRequestToJenkinsAPI()
+		jenkinsJSON := sendRequestToJenkinsAPI()
 
-        jobStatus := getJobsStatusFromJenkinsJSON(jenkinsJSON)
+		jobStatus := getJobsStatusFromJenkinsJSON(jenkinsJSON)
 
-        lightColorCode := getLightColorCode(jobStatus)
+		lightColorCode := getLightColorCode(jobStatus)
 
-        setArduinoLightColor(lightColorCode)
+		setArduinoLightColor(lightColorCode)
 
-        fmt.Println("Done", jobStatus)
-    }
+		fmt.Println("Done", jobStatus)
+	}
 }
 
 // Parses the JSON from Jenkins and retrives the specified job's status code.
@@ -141,7 +144,7 @@ func getLightColorCode(statusColor string) string {
 
 	lightColorCodes := map[string]string{
 		"blue":           "1",
-		"blue_anime":     "0",
+		"blue_anime":     "10",
 		"yellow":         "2",
 		"yellow_anime":   "20",
 		"red":            "3",
@@ -162,6 +165,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	//handleHttpRequests()
+
+	//handleHTTPRequests()
+
 	getFrequentStatusFromJenkins()
 }
